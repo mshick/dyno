@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions: {}
+
+jobs:
+  pr-title:
+    name: PR Title
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - uses: amannn/action-semantic-pull-request@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  test:
+    name: Lint, Typecheck, Test, Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm check
+
+      - name: Test
+        run: pnpm test
+        env:
+          VITEST_NO_DOCKER: '1'
+
+      - name: Build
+        run: pnpm build

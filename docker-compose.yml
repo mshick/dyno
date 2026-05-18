@@ -1,0 +1,7 @@
+services:
+  dynamodb:
+    image: amazon/dynamodb-local
+    environment:
+      _JAVA_OPTIONS: -Xms512m -Xmx512m
+    ports:
+      - 8088:8000

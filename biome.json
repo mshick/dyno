@@ -1,0 +1,88 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.14/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/coverage",
+      "!**/pnpm-lock.yaml",
+      "!**/*.tsbuildinfo"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "style": {
+        "noNonNullAssertion": "warn",
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error"
+      },
+      "suspicious": {
+        "noExplicitAny": "warn",
+        "noImportCycles": "error"
+      },
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
+      "nursery": {
+        "noFloatingPromises": "error"
+      }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always"
+    }
+  },
+  "json": {
+    "formatter": {
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "trailingNewline": false
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/**/__tests__/**", "src/**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noNonNullAssertion": "off"
+          },
+          "suspicious": {
+            "noExplicitAny": "off"
+          },
+          "nursery": {
+            "noFloatingPromises": "off"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "extends": "@tsconfig/node24/tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "useUnknownInCatchVariables": false,
+    "checkJs": true,
+    "allowJs": true,
+    "pretty": true,
+    "rewriteRelativeImportExtensions": true,
+    "allowImportingTsExtensions": true,
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "target": "ES2022",
+    "rootDir": "./",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*.ts", "vitest.*.ts"],
+  "exclude": ["node_modules", "dist"]
+}
