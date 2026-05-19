@@ -100,9 +100,14 @@ function _sendAll<
       return;
     }
 
-    void request.send().then((res) => {
-      done(null, res as BatchResult);
-    });
+    void request
+      .send()
+      .then((res) => {
+        done(null, res as BatchResult);
+      })
+      .catch((err: unknown) => {
+        done(null, { error: ensureError(err) } as BatchResult);
+      });
   };
 
   const drain = (results: Array<BatchResult | null>) => {

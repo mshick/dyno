@@ -6,7 +6,7 @@ import type {
 } from '@aws-sdk/lib-dynamodb';
 import createDebug from 'debug';
 import fastq, { type worker as QueueWorker } from 'fastq';
-import { calculateDelay, delay, reduceCapacity } from '../util.ts';
+import { calculateDelay, delay, ensureError, reduceCapacity } from '../util.ts';
 import type {
   BatchCommandInput,
   BatchCommandOutput,
@@ -226,9 +226,14 @@ function _sendCompletely<
       return result;
     };
 
-    void send(request).then((res) => {
-      done(null, res);
-    });
+    void send(request)
+      .then((res) => {
+        done(null, res);
+      })
+      .catch((err: unknown) => {
+        result.error = ensureError(err);
+        done(null, result);
+      });
   };
 
   const drain = (results: BatchResult[]) => {
