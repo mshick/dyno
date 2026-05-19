@@ -25,6 +25,13 @@ export default async function setup(project: TestProject) {
     }
   }
 
+  if (env.VITEST_NO_DOCKER) {
+    console.warn(
+      'VITEST_NO_DOCKER is set — skipping Docker startup. Tests that hit DynamoDB will fail.',
+    );
+    return async () => {};
+  }
+
   dockerConfig = {
     cwd: dirname,
     config: DOCKER_COMPOSE_FILE,
