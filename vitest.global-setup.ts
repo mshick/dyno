@@ -14,7 +14,7 @@ let dockerConfig: IDockerComposeOptions | undefined;
 export default async function setup(project: TestProject) {
   const env = {
     ...process.env,
-    ...loadEnv(project.config.mode, dirname, '')
+    ...loadEnv(project.config.mode, dirname, ''),
   };
 
   // Propagate loaded env vars (e.g. AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
