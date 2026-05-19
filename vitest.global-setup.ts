@@ -39,7 +39,7 @@ export default async function setup(_project: TestProject) {
     });
 
     console.info('Waiting for DynamoDB to be ready...');
-    await waitForConnection(dynamoConnection, { stabilizeDelay: 2000 });
+    await waitForConnection(dynamoConnection, { stabilizeDelay: 2000, maxDelay: 60000 });
   }
 
   return async () => {
