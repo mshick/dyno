@@ -2,9 +2,20 @@ import type { ConsumedCapacity, GlobalSecondaryIndexDescription } from '@aws-sdk
 import { marshall } from '@aws-sdk/util-dynamodb';
 import { faker } from '@faker-js/faker';
 import cloneDeep from 'lodash/cloneDeep.js';
-import { afterAll, assert, beforeAll, describe, expect, test } from 'vitest';
+import {
+  afterAll,
+  afterEach,
+  assert,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest';
 import { Dyno } from '../dyno.ts';
 import {
+  calculateDelay,
   ensureError,
   getPartitionKey,
   isEqualGSI,
@@ -19,6 +30,46 @@ const dyno = Dyno.from(getClient());
 
 afterAll(() => {
   dyno.destroy();
+});
+
+describe('calculateDelay', () => {
+  beforeEach(() => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  test('first retry (retryCount=0) uses base delay', () => {
+    expect(calculateDelay(0, 250, 1000)).toBe(250);
+  });
+
+  test('second retry doubles base delay', () => {
+    expect(calculateDelay(1, 250, 1000)).toBe(500);
+  });
+
+  test('third retry quadruples base delay', () => {
+    expect(calculateDelay(2, 250, 1000)).toBe(1000);
+  });
+
+  test('default maxDelay caps very large retry counts at 20s', () => {
+    expect(calculateDelay(20, 250, 1000)).toBe(20000);
+  });
+
+  test('caps backoff plus jitter at maxDelay', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(1);
+    expect(calculateDelay(20, 250, 1000)).toBe(20000);
+  });
+
+  test('respects custom maxDelay', () => {
+    expect(calculateDelay(10, 250, 1000, 5000)).toBe(5000);
+  });
+
+  test('adds jitter scaled by jitterBase', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5);
+    expect(calculateDelay(0, 250, 1000)).toBe(750);
+  });
 });
 
 describe('reduceCapacity', () => {

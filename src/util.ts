@@ -20,10 +20,15 @@ import isPlainObject from 'lodash/isPlainObject.js';
 import pick from 'lodash/pick.js';
 import type { NativeAttributeMap } from './types.ts';
 
-export function calculateDelay(retryCount: number, retryBase = 250, jitterBase = 1000) {
-  const backoff = retryBase * 2 ** Math.max(1, retryCount);
+export function calculateDelay(
+  retryCount: number,
+  retryBase = 250,
+  jitterBase = 1000,
+  maxDelay = 20000,
+) {
+  const backoff = retryBase * 2 ** Math.max(0, retryCount);
   const jitter = Math.random() * jitterBase;
-  return Math.round(backoff + jitter);
+  return Math.round(Math.min(maxDelay, backoff + jitter));
 }
 
 type KeyOfAttributeValue = keyof AttributeValue;
