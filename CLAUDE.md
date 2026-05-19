@@ -49,7 +49,7 @@ src/
 | `pnpm build`       | `prebuild` cleans, then `tsc --project tsconfig.build.json` |
 | `pnpm clean`       | Remove `dist` and `*.tsbuildinfo`                          |
 
-To skip Docker (most integration tests will fail): `VITEST_NO_DOCKER=1 pnpm test`.
+Tests require Docker — `pnpm test` will start DynamoDB-local via `docker-compose`.
 
 ## Conventions
 
