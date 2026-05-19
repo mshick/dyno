@@ -17,18 +17,22 @@ export default async function setup(_project: TestProject) {
     ...loadEnv('test', dirname, ''),
   };
 
+  // Propagate loaded env vars (e.g. AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+  // into process.env so the AWS SDK credential chain can find them.
+  for (const [key, value] of Object.entries(env)) {
+    if (value !== undefined && process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
+
   dockerConfig = {
     cwd: dirname,
     config: DOCKER_COMPOSE_FILE,
     composeOptions: ['--project-name', DOCKER_PROJECT_NAME],
-    log: true,
   };
 
   console.info('Starting Docker container for tests...');
-  const upResult = await upAll(dockerConfig);
-  console.info('docker-compose up exit code:', upResult.exitCode);
-  if (upResult.out) console.info('docker-compose stdout:', upResult.out);
-  if (upResult.err) console.info('docker-compose stderr:', upResult.err);
+  await upAll(dockerConfig);
 
   if (!env.DYNAMO_DB_REGION || !env.DYNAMO_DB_ENDPOINT) {
     throw new Error('DynamoDB region and endpoint must be set');
