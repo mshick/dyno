@@ -11,11 +11,19 @@ const dirname = import.meta.dirname;
 
 let dockerConfig: IDockerComposeOptions | undefined;
 
-export default async function setup(_project: TestProject) {
+export default async function setup(project: TestProject) {
   const env = {
     ...process.env,
-    ...loadEnv('test', dirname, ''),
+    ...loadEnv(project.config.mode, dirname, ''),
   };
+
+  // Propagate loaded env vars (e.g. AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+  // into process.env so the AWS SDK credential chain can find them.
+  for (const [key, value] of Object.entries(env)) {
+    if (value !== undefined && process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
 
   dockerConfig = {
     cwd: dirname,
@@ -39,7 +47,7 @@ export default async function setup(_project: TestProject) {
     });
 
     console.info('Waiting for DynamoDB to be ready...');
-    await waitForConnection(dynamoConnection, { stabilizeDelay: 2000 });
+    await waitForConnection(dynamoConnection, { stabilizeDelay: 2000, maxDelay: 60000 });
   }
 
   return async () => {

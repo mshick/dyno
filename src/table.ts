@@ -107,7 +107,7 @@ export async function waitForTable(
       creatingOrDeleting = tableDescription?.Table?.TableStatus === TableStatus.DELETING;
     } else {
       creatingOrDeleting =
-        !tableDescription?.Table || tableDescription?.Table?.TableStatus === IndexStatus.CREATING;
+        !tableDescription?.Table || tableDescription?.Table?.TableStatus === TableStatus.CREATING;
     }
   }
 }

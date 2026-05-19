@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
   return {
     resolve: {
       tsconfigPaths: true,
@@ -15,7 +15,7 @@ export default defineConfig(() => {
         provider: 'istanbul',
         reporter: ['text-summary', 'json'],
       },
-      env: loadEnv('test', import.meta.dirname, ''),
+      env: loadEnv(mode, import.meta.dirname, ''),
     },
   };
 });
