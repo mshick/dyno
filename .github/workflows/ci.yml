@@ -49,8 +49,6 @@ jobs:
 
       - name: Test
         run: pnpm test
-        env:
-          VITEST_NO_DOCKER: '1'
 
       - name: Build
         run: pnpm build
