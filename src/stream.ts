@@ -329,12 +329,9 @@ export function createPutStream(
 
       // In these cases the items were not processed, so retry the items originally provided
       if (error && isThrottlingError(error) && !response) {
-        setTimeout(
-          () => {
-            writePage(items, retryCount + 1, callback);
-          },
-          calculateDelay(retryCount + 1),
-        );
+        setTimeout(() => {
+          writePage(items, retryCount + 1, callback);
+        }, calculateDelay(retryCount));
         return;
       }
 
@@ -345,12 +342,9 @@ export function createPutStream(
       // If there are any dangling items and retries are left, attempt to process them
       if (writableUnprocessedItems?.length && retryCount < maxRetries) {
         const page = writableUnprocessedItems.splice(0, pageSize);
-        setTimeout(
-          () => {
-            writePage(page, retryCount + 1, callback);
-          },
-          calculateDelay(retryCount + 1),
-        );
+        setTimeout(() => {
+          writePage(page, retryCount + 1, callback);
+        }, calculateDelay(retryCount));
         return;
       }
 
