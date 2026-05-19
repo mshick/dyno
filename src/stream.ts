@@ -122,14 +122,14 @@ export function createReadStream(
         ...commandInput,
         TableName,
         ExclusiveStartKey: readable.LastEvaluatedKey,
-        Limit: getLimit(pageSize, nextLimit),
+        Limit: getLimit(nextLimit, pageSize),
       });
     } else {
       command = new QueryCommand({
         ...commandInput,
         TableName,
         ExclusiveStartKey: readable.LastEvaluatedKey,
-        Limit: getLimit(pageSize, nextLimit),
+        Limit: getLimit(nextLimit, pageSize),
       });
     }
 
