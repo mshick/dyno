@@ -30,9 +30,14 @@ function _batchGetItemRequests(params: BatchGetCommandInput): BatchGetCommandInp
 
       return chop(toMake);
 
-      function chop(requestsToMake: Array<Record<string, any>>) {
-        // request set that we're building
-        const requests = paramSet[paramSet.length - 1]!.RequestItems ?? {};
+      function chop(requestsToMake: Array<Record<string, unknown>>) {
+        // request set that we're building — paramSet is seeded with one entry
+        // and only grows, so paramSet[paramSet.length - 1] is always defined.
+        const lastParams = paramSet[paramSet.length - 1];
+        if (!lastParams) {
+          return paramSet;
+        }
+        const requests = lastParams.RequestItems ?? {};
         const requestsTable = requests[tableName] ?? { Keys: [] };
 
         requests[tableName] = requestsTable;
@@ -46,7 +51,7 @@ function _batchGetItemRequests(params: BatchGetCommandInput): BatchGetCommandInp
         const more = requestsToMake.splice(0, 100 - count);
 
         // add them to the request set
-        requestsTable.Keys = requestsTable.Keys!.concat(more);
+        requestsTable.Keys = (requestsTable.Keys ?? []).concat(more);
 
         // if there are no requests left, return the modified paramSet
         if (!requestsToMake.length) {
@@ -98,8 +103,12 @@ function _batchWriteItemRequests(
       return chop([...reqs]);
 
       function chop(requestsToMake: NonNullable<BatchWriteCommandInput['RequestItems']>[string]) {
-        // request set that we're building
-        const requests = paramSet[paramSet.length - 1]!.RequestItems ?? {};
+        // paramSet is seeded with one entry and only grows.
+        const lastParams = paramSet[paramSet.length - 1];
+        if (!lastParams) {
+          return paramSet;
+        }
+        const requests = lastParams.RequestItems ?? {};
         const requestsTable = requests[tableName] ?? [];
 
         requests[tableName] = requestsTable;

@@ -132,7 +132,7 @@ function _sendCompletely<
 
   l('requests:', requests.length, 'concurrency:', concurrency, 'maxRetries:', maxRetries);
 
-  const worker: QueueWorker<any, Fetcher<I>, BatchResult> = (request, done) => {
+  const worker: QueueWorker<unknown, Fetcher<I>, BatchResult> = (request, done) => {
     const result: BatchResult = { error: null, data: {} };
 
     let retryCount = 0;
@@ -149,10 +149,12 @@ function _sendCompletely<
       if ('Responses' in res.data) {
         if (res.data.Responses) {
           result.data.Responses ??= {};
+          const responses = result.data.Responses;
           for (const [table, item] of Object.entries(res.data.Responses)) {
-            result.data.Responses[table] ??= [];
-            for (const res of item) {
-              result.data.Responses![table]!.push(res);
+            responses[table] ??= [];
+            const bucket = responses[table];
+            for (const r of item) {
+              bucket.push(r);
             }
           }
         }
@@ -195,10 +197,13 @@ function _sendCompletely<
       if ('UnprocessedKeys' in res.data) {
         if (res.data.UnprocessedKeys) {
           result.data.UnprocessedKeys ??= {};
+          const unprocessedKeys = result.data.UnprocessedKeys;
           for (const [table, item] of Object.entries(res.data.UnprocessedKeys)) {
-            result.data.UnprocessedKeys[table] ??= { Keys: [] };
-            for (const res of item.Keys ?? []) {
-              result.data.UnprocessedKeys![table]!.Keys.push(res);
+            unprocessedKeys[table] ??= { Keys: [] };
+            const bucket = unprocessedKeys[table];
+            bucket.Keys ??= [];
+            for (const r of item.Keys ?? []) {
+              bucket.Keys.push(r);
             }
           }
         }
@@ -207,10 +212,12 @@ function _sendCompletely<
       if ('UnprocessedItems' in res.data) {
         if (res.data.UnprocessedItems) {
           result.data.UnprocessedItems ??= {};
+          const unprocessedItems = result.data.UnprocessedItems;
           for (const [table, items] of Object.entries(res.data.UnprocessedItems)) {
-            result.data.UnprocessedItems[table] ??= [];
-            for (const res of items) {
-              result.data.UnprocessedItems![table]!.push(res);
+            unprocessedItems[table] ??= [];
+            const bucket = unprocessedItems[table];
+            for (const r of items) {
+              bucket.push(r);
             }
           }
         }
@@ -246,10 +253,12 @@ function _sendCompletely<
           if ('Responses' in res.data) {
             if (res.data.Responses) {
               data.Responses ??= {};
+              const responses = data.Responses;
               for (const [table, response] of Object.entries(res.data.Responses)) {
-                data.Responses[table] ??= [];
+                responses[table] ??= [];
+                const bucket = responses[table];
                 for (const r of response) {
-                  data.Responses![table]!.push(r);
+                  bucket.push(r);
                 }
               }
             }
@@ -258,10 +267,12 @@ function _sendCompletely<
           if ('UnprocessedItems' in res.data) {
             if (res.data.UnprocessedItems && Object.keys(res.data.UnprocessedItems ?? {}).length) {
               data.UnprocessedItems ??= {};
+              const unprocessedItems = data.UnprocessedItems;
               for (const [table, items] of Object.entries(res.data.UnprocessedItems)) {
-                data.UnprocessedItems[table] ??= [];
+                unprocessedItems[table] ??= [];
+                const bucket = unprocessedItems[table];
                 for (const r of items) {
-                  data.UnprocessedItems![table]!.push(r);
+                  bucket.push(r);
                 }
               }
             }
@@ -270,10 +281,13 @@ function _sendCompletely<
           if ('UnprocessedKeys' in res.data) {
             if (res.data.UnprocessedKeys && Object.keys(res.data.UnprocessedKeys ?? {}).length) {
               data.UnprocessedKeys ??= {};
+              const unprocessedKeys = data.UnprocessedKeys;
               for (const [table, items] of Object.entries(res.data.UnprocessedKeys)) {
-                data.UnprocessedKeys[table] ??= { Keys: [] };
+                unprocessedKeys[table] ??= { Keys: [] };
+                const bucket = unprocessedKeys[table];
+                bucket.Keys ??= [];
                 for (const r of items.Keys ?? []) {
-                  data.UnprocessedKeys![table]!.Keys!.push(r);
+                  bucket.Keys.push(r);
                 }
               }
             }
@@ -310,7 +324,7 @@ function _sendCompletely<
   q.drain = drain(results);
 
   for (const req of requests) {
-    q.push(req, (err, res) => {
+    q.push(req, (_err, res) => {
       if (res) {
         results.push(res);
       }
@@ -374,6 +388,7 @@ export class SendCompletelyBatch<
       | SendCompletelyCompactCallback<I>
       | (SendCompletelyOptions & CompactOptions),
     cb?: SendCompletelyCallback<I> | SendCompletelyCompactCallback<I>,
+    // biome-ignore lint/suspicious/noConfusingVoidType: callback-or-promise overload returns void in the callback path
   ): void | Promise<{
     data: SendCompletelyResult<O> | SendCompletelyCompactResult<I>;
     error: AggregateError | undefined;

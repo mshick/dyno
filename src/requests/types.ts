@@ -5,6 +5,7 @@ import type {
   BatchWriteCommandInput,
   BatchWriteCommandOutput,
 } from '@aws-sdk/lib-dynamodb';
+import type { NativeAttributeValue } from '@aws-sdk/util-dynamodb';
 import type { NativeAttributeMap } from '../types.ts';
 
 export type BatchCommandInput = BatchGetCommandInput | BatchWriteCommandInput;
@@ -32,7 +33,7 @@ export type Fetcher<T extends BatchCommandInput> = {
 export type BatchResult = {
   error?: unknown;
   data: {
-    Responses?: Record<string, Array<Record<string, any>>>;
+    Responses?: Record<string, Array<Record<string, NativeAttributeValue>>>;
     ConsumedCapacity?: ConsumedCapacity;
     UnprocessedKeys?: Record<string, { Keys: NativeAttributeMap[] }>;
     UnprocessedItems?: Record<string, NativeAttributeMap[]>;

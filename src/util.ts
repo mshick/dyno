@@ -122,8 +122,8 @@ export function storageCost(item: NativeAttributeMap) {
 }
 
 export const delay = async <T>(timeout: number, value?: T): Promise<T> =>
-  new Promise((resolve): void => {
-    setTimeout(resolve, timeout, value as any);
+  new Promise<T>((resolve): void => {
+    setTimeout(resolve, timeout, value as T);
   });
 
 /**

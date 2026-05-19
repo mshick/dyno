@@ -41,8 +41,6 @@ pnpm lint          # biome check
 pnpm build         # emits dist/
 ```
 
-To run tests without Docker (most tests will fail), set `VITEST_NO_DOCKER=1`.
-
 ## Release
 
 Releases are driven by [release-please](https://github.com/googleapis/release-please)

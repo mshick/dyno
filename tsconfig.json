@@ -19,7 +19,8 @@
     "moduleResolution": "nodenext",
     "target": "ES2022",
     "rootDir": "./",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "types": ["node"]
   },
   "include": ["src/**/*.ts", "vitest.*.ts"],
   "exclude": ["node_modules", "dist"]

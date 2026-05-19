@@ -1,11 +1,10 @@
 import { defineConfig, loadEnv } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
-
-const dirname = import.meta.dirname;
 
 export default defineConfig(() => {
   return {
-    plugins: [tsconfigPaths()],
+    resolve: {
+      tsconfigPaths: true,
+    },
     test: {
       globalSetup: ['vitest.global-setup.ts'],
       testTimeout: 15000,
@@ -16,7 +15,7 @@ export default defineConfig(() => {
         provider: 'istanbul',
         reporter: ['text-summary', 'json'],
       },
-      env: loadEnv('test', dirname, ''),
+      env: loadEnv('test', import.meta.dirname, ''),
     },
   };
 });

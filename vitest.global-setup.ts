@@ -11,24 +11,20 @@ const dirname = import.meta.dirname;
 
 let dockerConfig: IDockerComposeOptions | undefined;
 
-export default async function setup(project: TestProject) {
+export default async function setup(_project: TestProject) {
   const env = {
     ...process.env,
     ...loadEnv('test', dirname, ''),
   };
 
-  if (env.VITEST_NO_DOCKER) {
-    console.warn('Starting tests without docker support, some tests will fail');
-  } else {
-    dockerConfig = {
-      cwd: dirname,
-      config: DOCKER_COMPOSE_FILE,
-      composeOptions: ['--project-name', DOCKER_PROJECT_NAME],
-    };
+  dockerConfig = {
+    cwd: dirname,
+    config: DOCKER_COMPOSE_FILE,
+    composeOptions: ['--project-name', DOCKER_PROJECT_NAME],
+  };
 
-    console.info('Starting Docker container for tests...');
-    await upAll(dockerConfig);
-  }
+  console.info('Starting Docker container for tests...');
+  await upAll(dockerConfig);
 
   if (!env.DYNAMO_DB_REGION || !env.DYNAMO_DB_ENDPOINT) {
     throw new Error('DynamoDB region and endpoint must be set');

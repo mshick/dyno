@@ -38,7 +38,6 @@ export async function waitForConnection(
       throw new Error('Max connection attempts reached');
     }
 
-    // biome-ignore lint/performance/noAwaitInLoops: is fine
     const tables = await client.listTables().catch(() => undefined);
 
     if (tables) {
@@ -151,23 +150,26 @@ export async function createTable(
 
   try {
     const table = await client.describeTable({ TableName });
-    return {
-      TableDescription: table.Table!,
-    };
+    if (!table.Table) {
+      throw new Error(`describeTable returned no Table for ${TableName}`);
+    }
+    return { TableDescription: table.Table };
   } catch (err) {
     if (err instanceof ResourceNotFoundException) {
       try {
         const table = await client.createTable(input);
-        return {
-          TableDescription: table.TableDescription!,
-        };
+        if (!table.TableDescription) {
+          throw new Error(`createTable returned no TableDescription for ${TableName}`);
+        }
+        return { TableDescription: table.TableDescription };
       } catch (err) {
         if (err instanceof ResourceInUseException) {
           await waitForTable(client, { TableName }, TableStatus.CREATING);
           const table = await client.describeTable({ TableName });
-          return {
-            TableDescription: table.Table!,
-          };
+          if (!table.Table) {
+            throw new Error(`describeTable returned no Table for ${TableName}`);
+          }
+          return { TableDescription: table.Table };
         }
 
         throw new Error(`Failed to create ${TableName}`, { cause: err });

@@ -137,7 +137,10 @@ export function createReadStream(
 
     client.send(
       command,
-      (error: any, response: ScanCommandOutput | QueryCommandOutput | undefined) => {
+      (
+        error: SdkError | undefined,
+        response: ScanCommandOutput | QueryCommandOutput | undefined,
+      ) => {
         logRead('got response');
 
         pending = false;
@@ -250,7 +253,7 @@ export function createPutStream(
 
   function write(
     item: Record<string, NativeAttributeValue>,
-    encoding: BufferEncoding,
+    _encoding: BufferEncoding,
     callback: (error?: Error) => void,
   ) {
     const nextItemSize = getItemSize(item);

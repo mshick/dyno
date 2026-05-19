@@ -94,7 +94,7 @@ function _sendAll<
 
   l('requests:', requests.length, 'concurrency:', concurrency);
 
-  const worker: QueueWorker<any, Fetcher<I> | null, BatchResult> = (request, done) => {
+  const worker: QueueWorker<unknown, Fetcher<I> | null, BatchResult> = (request, done) => {
     if (!request) {
       done(null);
       return;
@@ -310,6 +310,7 @@ export class SendAllBatch<
   sendAll(
     optionsOrCb?: SendAllCallback<I> | SendAllCompactCallback<I> | SendAllOptions,
     cb?: SendAllCallback<I> | SendAllCompactCallback<I>,
+    // biome-ignore lint/suspicious/noConfusingVoidType: callback-or-promise overload returns void in the callback path
   ): void | Promise<{
     error: Array<Error | null> | undefined;
     data: Array<SendAllResult<O> | SendAllCompactResult<I> | null>;
