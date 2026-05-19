@@ -21,10 +21,14 @@ export default async function setup(_project: TestProject) {
     cwd: dirname,
     config: DOCKER_COMPOSE_FILE,
     composeOptions: ['--project-name', DOCKER_PROJECT_NAME],
+    log: true,
   };
 
   console.info('Starting Docker container for tests...');
-  await upAll(dockerConfig);
+  const upResult = await upAll(dockerConfig);
+  console.info('docker-compose up exit code:', upResult.exitCode);
+  if (upResult.out) console.info('docker-compose stdout:', upResult.out);
+  if (upResult.err) console.info('docker-compose stderr:', upResult.err);
 
   if (!env.DYNAMO_DB_REGION || !env.DYNAMO_DB_ENDPOINT) {
     throw new Error('DynamoDB region and endpoint must be set');

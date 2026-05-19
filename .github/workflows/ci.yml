@@ -47,8 +47,20 @@ jobs:
       - name: Typecheck
         run: pnpm check
 
+      - name: Docker debug
+        run: |
+          docker --version
+          docker compose version || echo "no compose v2"
+          docker-compose --version || echo "no compose v1"
+
       - name: Test
         run: pnpm test
+
+      - name: Docker post-mortem
+        if: always()
+        run: |
+          docker ps -a
+          docker compose -f docker-compose.yml -p mshick-dyno-vitest logs || true
 
       - name: Build
         run: pnpm build
