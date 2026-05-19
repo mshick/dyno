@@ -13,6 +13,9 @@ import {
   batchWriteAll,
   batchWriteItemRequests,
 } from '../requests/requests.ts';
+import { SendAllBatch } from '../requests/send-all.ts';
+import { SendCompletelyBatch } from '../requests/send-completely.ts';
+import type { Fetcher } from '../requests/types.ts';
 import { createFixtures, getClient, getTestTableConfig } from './mocks.ts';
 
 const hashTableName = 'idhash';
@@ -865,6 +868,47 @@ describe('requests', () => {
         },
         'aggregated consumed capacity from 2 requests',
       );
+    });
+  });
+
+  describe('worker rejection handling', () => {
+    test('sendAll surfaces a rejected send() instead of hanging', async () => {
+      const factory = (params: BatchWriteCommandInput): Fetcher<BatchWriteCommandInput> => ({
+        params,
+        send: () => Promise.reject(new Error('boom')),
+      });
+
+      const batch = new SendAllBatch<BatchWriteCommandInput>(
+        factory,
+        [{ RequestItems: {} }, { RequestItems: {} }],
+        { concurrency: 2 },
+      );
+
+      const { error, data } = await batch.sendAll();
+
+      assert.equal(error?.length, 2, 'every rejected request produced an error');
+      assert.equal((error?.[0] as Error).message, 'boom');
+      assert.equal((error?.[1] as Error).message, 'boom');
+      assert.deepEqual(data, [null, null], 'no data for rejected requests');
+    });
+
+    test('sendCompletely surfaces a rejected send() instead of hanging', async () => {
+      const factory = (params: BatchWriteCommandInput): Fetcher<BatchWriteCommandInput> => ({
+        params,
+        send: () => Promise.reject(new Error('kaboom')),
+      });
+
+      const batch = new SendCompletelyBatch<BatchWriteCommandInput>(
+        factory,
+        [{ RequestItems: {} }],
+        { concurrency: 1, maxRetries: 0 },
+      );
+
+      const { error } = await batch.sendAll();
+
+      assert.instanceOf(error, AggregateError);
+      assert.equal(error?.errors.length, 1, 'one underlying error aggregated');
+      assert.equal((error?.errors[0] as Error).message, 'kaboom');
     });
   });
 });
