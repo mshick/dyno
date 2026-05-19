@@ -24,3 +24,6 @@ coverage
 
 # typescript
 *.tsbuildinfo
+
+# claude code tooling (worktrees, local agent state)
+.claude/

@@ -467,6 +467,21 @@ describe('requests', () => {
       const { error: unprocessedError } = await unprocessed!.sendAll();
       assert.ifError(unprocessedError, 'successful .sendAll on unprocessed requestSet');
     });
+
+    test('throws when a single item exceeds maxSize instead of looping forever', () => {
+      const docClient = DynamoDBDocument.from(client);
+
+      // maxSize=100 bytes; one item that obviously marshals larger than that
+      const oversizeParams: BatchWriteCommandInput = {
+        RequestItems: {
+          [tableName]: [{ PutRequest: { Item: { id: 'big', blob: 'x'.repeat(1024) } } }],
+        },
+      };
+
+      expect(() => batchWriteItemRequests(docClient, oversizeParams, { maxSize: 100 })).toThrow(
+        /exceeds maxSize/i,
+      );
+    });
   });
 
   describe.sequential('batchGetAll', () => {

@@ -129,6 +129,7 @@ function _batchWriteItemRequests(
         }, 0);
 
         // Add requests one by one until it would put us over the size limit
+        const startingCount = count;
         for (let i = 0; i < maxLength - count; i++) {
           const next = requestsToMake[0];
           if (!next) {
@@ -152,6 +153,14 @@ function _batchWriteItemRequests(
         // if there are no requests left, return the modified paramSet
         if (!requestsToMake.length) {
           return paramSet;
+        }
+
+        // If the next item couldn't fit in an empty params set, it's larger than
+        // maxSize on its own — recursing would loop forever.
+        if (startingCount === 0 && requestsTable.length === 0) {
+          const next = requestsToMake[0];
+          const nextSize = next?.PutRequest?.Item ? getItemSize(next.PutRequest.Item) : 0;
+          throw new Error(`Item exceeds maxSize: item is ~${nextSize} bytes, limit is ${maxSize}`);
         }
 
         // otherwise start a new request set
